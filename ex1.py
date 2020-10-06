@@ -29,7 +29,6 @@ def readCrossword():
         i +=1
     return crossword, i, j
 
-
 # Function: readDictionary
 # ------------------------------------------------------------------------------
 # Stores the list of words of a file onto a dictionary indexed by the size of
