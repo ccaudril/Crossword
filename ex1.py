@@ -5,7 +5,7 @@
 # Function: function_name
 # ------------------------------------------------------------------------------
 # Function that reads a file containing a crossword and stores it in a matrix
-#   
+#
 #   returns:
 #       crossword = the matrix representation of the crossword
 #       i = vertical size of the crossword
@@ -36,15 +36,17 @@ def readCrossword():
 #
 #   returns: a list of the words in the file indexed by size
 #
-def readDictionary():
+def readDictionary(lenghts):
     file = open("diccionari_CB_v2.txt", "r") # Open the file
     word_list = [] # List with all the words from the dictionary
     max_len = 1
 
+
     for line in file:
-        word_list.append(line[:-1]) # Add word without the '\n'
-        if len(line) > max_len: # Calculate the longest words length
-            max_len = len(line)
+        if (len(line[:-1]) in lenghts)
+            word_list.append(line[:-1]) # Add word without the '\n'
+            if len(line) > max_len: # Calculate the longest words length
+                max_len = len(line)
 
     dictionary = [None] * (max_len-2) # Create empy dictionary
 
@@ -156,13 +158,21 @@ def calculateLengthVertical(crossword, i, j, n):
 #
 def calculateSlots(crossword, n, m):
     slots = []
+    lenghts = []
     for i in range(n):
         for j in range(m):
             if crossword[i][j] != -1:
                 if horizontalBeginning(crossword, i, j, m):
-                    slots.append(['H', i, j, calculateLengthHorizontal(crossword, i, j, m)])
+                    slots.append(['H', i, j, length = calculateLengthHorizontal(crossword, i, j, m)])
                 if verticalBeginning(crossword, i, j, n):
-                    slots.append(['V', i, j, calculateLengthVertical(crossword, i, j, n)])
+                    slots.append(['V', i, j, lenght = calculateLengthVertical(crossword, i, j, n)])
+                if lenght not in lenghts:
+                    lenghts.append(lenght)
+
+
+    # Order the slots list
+    slots.sort(key = lambda x: x[3], reverse=True)
+
     return slots
 
 # Function: main
@@ -196,7 +206,7 @@ def max_word(slots, m, n):
     while i < len(slots):
         if(slots[i][3]>max):    # slots[i][3] = length
             max=slots[i][3]
-            position=slots[i]     
+            position=slots[i]
     return position
 
 
@@ -216,23 +226,19 @@ def find_constraint(word,solution):
     i=word[1]
     j=word[2]
     length=word[3]
-    constraint_list = []  
+    constraint_list = []
     if word[0]=='V':
         while i <= word[1]+length:
             if solution[i][j] != '0':
-                letter = solution[i][j]
-                constraint_list = constraint_list + [i,letter]
-                i+=1
-            else:
-                i+=1
-    else :      # if word[0]=='H'       
+                constraint_list = constraint_list + [i,solution[i][j]]
+            i+=1
+
+    else :      # if word[0]=='H'
         while j <= word[2]+length:
             if solution[i][j] != '0':
-                letter = solution[i][j]
-                constraint_list = constraint_list + [j,letter]
-                j+=1
-            else:
-                j+=1   
+                constraint_list = constraint_list + [j,solution[i][j]]
+            j+=1
+
     return constraint_list
 
 
@@ -267,6 +273,42 @@ def find_word(length, constraint_list, dictionary):
 
 
 
+satisfies_constraint(word, slot):
+    for tuple in slot:
+        if word[tuple[0]] == tuple[1]:
+            return True
+    return False
+
+
+write_word(crossword, word, slot):
+    i = slot[1]
+    j = slot[2]
+
+    if slot[0] == "V":
+        for k in slot[3]:
+            crossword[i+k][j] = word[k]
+    else:
+        for k in slot[3]:
+            crossword[i][j+k] = word[k]
+    return crossword
+
+
+calculate_constraints(crossword, word, slots, slot):
+    i = slot[1]
+    j = slot[2]
+
+    if slot[0] == "V":
+        for k in slot[3]:
+            if (j != 0) and crossword[i+k][j-1] == 0:
+                crossword[i]
+    else:
+
+    return slots
+
+
+
+
+
 # Function: crossword_solution
 # ------------------------------------------------------------------------------
 # Gives a final solution for the given crossword
@@ -280,45 +322,15 @@ def find_word(length, constraint_list, dictionary):
 #   returns a crossword as final solution
 #
 def crossword_solution(slots, m, n, dictionary, crossword):
-    temp_solution = crossword
-    slots_copy = slots
-    # we will erase each word of slots_copy when we find its solution in the dictionary
-    k=0
 
-    while k <= len(slots):
-        word = max_word(slots_copy, m, n)
-        constraint_list = find_constraint(word, temp_solution)
+    if slots == None:
+        return crossword
 
-        # backtracking (we search another word if this one doesn't work) :
-        while find_word(word[3], constraint_list, dictionary) == 0:
-            slots_copy_2 = slots_copy
-            slots_copy_2.remove(word)
-            word = max_word(slots_copy_2, m, n)
-
-        # when a word works, we write it in the solution
-        if find_word(word[3], constraint_list, dictionary) != 0:
-            word_from_dictionary = find_word(word[3], constraint_list, dictionary)
-            slots_copy.remove(word)
-
-            i=word[1]
-            j=word[2]
-            length=word[3]
-                
-            if word[0]=='V':
-                while i <= word[1]+length:
-                    temp_solution[i][j] = word_from_dictionary[i]
-                    i+=1
-            else :      # if word[0]='H'       
-                while j <= word[2]+length:
-                    temp_solution[i][j] = word_from_dictionary[j]
-                    j+=1   
-
-        # else :
-        #   is it possible ?
-
-        k+=1
-    
-    final_solution = temp_solution
-    return final_solution
-        
-
+    for slot in slots:
+        for word in dictionary[slot[3]-2]:
+        if satisfies_constraint(word, slot[4::]):
+            crossword = write_word(crossword, word, slot)
+            slots = calculate_constraints(crossword, word, slots, slot)
+            if (sol = crossword_backtracking(slots[1::], m, n, dictionary, crossword)) != None
+                return sol
+    return None
