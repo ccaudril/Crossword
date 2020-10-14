@@ -229,9 +229,9 @@ def write_word(crossword, word, slot):
 def calculate_constraints(crossword, word, slots, slot):
     i = slot[1]
     j = slot[2]
-    n = len(crossword[0])
+    n = slot[3]
     if slot[0] == "V":
-        while i <= slot[1]+n:
+        while i < slot[1]+n:
             for s in slots:
                 if s[0]=='H' and s[1]==i and s[2]<=j and j<=s[2]+s[3]:  # means that both words cross
                     letter_constraint = crossword[i][j]
@@ -239,7 +239,7 @@ def calculate_constraints(crossword, word, slots, slot):
                     s.append([position_constraint,letter_constraint])
             i += 1
     else:
-        while j <= slot[2]+n:
+        while j < slot[2]+n:
             for s in slots:
                 if s[0]=='V' and s[1]<=i and i<=s[1]+s[3] and s[2]==j: # means that both words cross
                     letter_constraint = crossword[i][j]
