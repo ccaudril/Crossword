@@ -1,62 +1,6 @@
-from numpy import array as a
-
-# searches in the dictionnary every word with a certain length
-def search_word(length):
-    l = list()
-    with open("diccionari_CB_v2.txt","r") as file:
-        i=0
-        j=0
-        while j<=length(file):
-            if length(file[j]==length):
-                l[i]=file
-            i+=1
-    return l
-
-# creates a matrix starting from the crossword
-def create_matrix():
-    tab = a.array([])
-    with open("crossword_CB_v2.txt","r") as file:
-        i=0
-        j=0
-        for element in file:
-            tab[i][j] = element[i][j]
-    return tab
-
-# finds longest word that has to be guessed
-def find_word(matrix):
-    dim = matrix.shape
-    m = str(dim[0])     # number of rows
-    n = str(dim[1])     # number of columns
-    length = 0          # to store 
-    for i in range (0,m):
-    for j in range (0,n):
-
-    # begins with horizontal words
-        if matrix[i][j]=='#':
-            
-            if i<m:
-                i++
-            else:
-                j++
-
-        else: # if matrix[i][j]==0
-
-
-        elif i=m && j<n:
-            i=0
-            j+=1
-        elif i=m && j=n:
-
-        elif matrix[i][j]==0 && i<m:
-            length+=1
-            
-
-    
-
-
 #!/usr/bin/python
 
-# Function: function_name
+# Function: readCrossword
 # ------------------------------------------------------------------------------
 # Function that reads a file containing a crossword and stores it in a matrix
 #
@@ -226,109 +170,10 @@ def calculateSlots(crossword, n, m):
                     if lenght not in lenghts:
                         lenghts.append(lenght)
 
-
-
     # Order the slots list
     slots.sort(key = lambda x: x[3], reverse=True)
 
     return slots, lenghts
-
-# Function: main
-# ------------------------------------------------------------------------------
-# Executes the main program
-#
-#def main():
-#    crossword, n, m = readCrossword()
-#    slots = calculateSlots(crossword, n, m)
-#    dictionary = readDictionary()
-
-#if __name__ == "__main__":
-#    main()
-
-
-
-# Function: max_word
-# ------------------------------------------------------------------------------
-# Find the first word with maximal length in the crossword
-#
-#   slots: list with the slots' information
-#   m: vertical size of the crossword
-#   n: horizontal size of the crossword
-#
-#   returns: word with maximal length (if there is many, returns the first of the slots' list)
-#       => ['V'/'H' , row, column, length]
-#
-def max_word(slots, m, n):
-    i=0     # i : row index in the slots' list
-    max=0   # maximum word length founded in the crossword
-    while i < len(slots):
-        if(slots[i][3]>max):    # slots[i][3] = length
-            max=slots[i][3]
-            position=slots[i]
-    return position
-
-
-
-# Function: find_constraint
-# ------------------------------------------------------------------------------
-# Finds if there is any constraint for a word
-# (a constraint is letter already founded whiwh has to be in this word)
-#
-#   word : given word in the slots' list
-#   solution : partial solution of the crossword
-#
-#   constraint_list : list with all constraints of letters for one slot
-#       => [position, letter]
-#
-def find_constraint(word,solution):
-    i=word[1]
-    j=word[2]
-    length=word[3]
-    constraint_list = []
-    if word[0]=='V':
-        while i <= word[1]+length:
-            if solution[i][j] != '0':
-                constraint_list = constraint_list + [i,solution[i][j]]
-            i+=1
-
-    else :      # if word[0]=='H'
-        while j <= word[2]+length:
-            if solution[i][j] != '0':
-                constraint_list = constraint_list + [j,solution[i][j]]
-            j+=1
-
-    return constraint_list
-
-
-
-# Function: find_word
-# ------------------------------------------------------------------------------
-# Searchs in the dictionary if there is a word with a length and constraints
-#
-#   length: length of the searched word
-#   constraint_list: letter constraint in the searched word
-#   dictionary: result of the function 'readDictionary'
-#
-#   returns 0 if there isn't such a word in the dictionary
-#   returns a solution for the searched word if it exists
-#
-def find_word(length, constraint_list, dictionary):
-    word=' '
-    for word in dictionary :
-        if len(word)==length:
-            i=0
-            while i<=len(constraint_list):
-                letter = constraint_list[i][1]
-                position = constraint_list[i][0]
-                if word[position] != letter:
-                    break
-                else:
-                    i+=1
-    if word==' ':
-        return 0
-    else :
-        return word
-
 
 # Function: satisfies_constraint
 # ------------------------------------------------------------------------------
@@ -344,7 +189,6 @@ def satisfies_constraint(word, constraints):
         if word[tuple[0]] != tuple[1]:
             return False
     return True
-
 
 # Function: write_word
 # ------------------------------------------------------------------------------
@@ -371,58 +215,38 @@ def write_word(crossword, word, slot):
             k+=1
     return crossword
 
-
+# Function: calculate_constraints
+# ------------------------------------------------------------------------------
+# Add to the current slot new constraints due to the new word
+#
+#   crossword: matrix representation of the crossword
+#   word: new word in the crossword => brings new constraints
+#   slots : slot list for the entire crossword
+#   slot: slot corresponding to the new word
+#
+#   returns slots with the new constraints in addition
+#
 def calculate_constraints(crossword, word, slots, slot):
     i = slot[1]
     j = slot[2]
     n = len(crossword[0])
-    count = 0
-    k = 0
-
     if slot[0] == "V":
-        while k < slot[3]:
-            if crossword[i+k][j+(0 if j>n else 1)] == 0 or crossword[i+k][j-(1 if j>0 else 0)] == 0:
-                l = j
-                #print("l1:",l)
-                while l > 0 and crossword[i+k][l-1] == 0:
-                    l-=1
-                    #print("l2:",l)
-                count = 0
-                for s in slots:
-                    if s[1]==i+k and s[2]==l:
-                        #print("slots:", slots)
-                        #print("j-l: ", j, "-", l, "=", j-l)
-                        #print("crossword[",i,"][",j,"]: ", crossword[i][j])
-                        slots[count].append([(j-l),crossword[i][j]])
-                        #print("slots new:", slots)
-                        break
-                    count+=1
-            k+=1
+        while i <= slot[1]+n:
+            for s in slots:
+                if s[0]=='H' and s[1]==i and s[2]<=j and j<=s[2]+s[3]:  # means that both words cross
+                    letter_constraint = crossword[i][j]
+                    position_constraint = j-s[2]
+                    s.append([position_constraint,letter_constraint])
+            i += 1
     else:
-        #print("k < slot[3]:",k,"<",slot[3])
-        while k < slot[3]:
-            #print("crossword[",i+(0 if i>n else 1),"][",j+k,"] --- ","crossword[",i-(1 if i>0 else 0),"][",j+k,"]")
-
-            if crossword[i+(0 if i>n else 1)][j+k] == 0 or crossword[i-(1 if i>0 else 0)][j+k] == 0:
-                l = i
-                #print("l1:",l)
-                while l>0 and crossword[i-l][j+k] == 0:
-                    l-=1
-                    #print("l2:",l)
-                count = 0
-                for s in slots:
-                    if s[1]==l and s[2]==j+k:
-                        #print("slots:", slots)
-                        #print("i-l: ", i, "-", l, "=", i-l)
-                        #print("crossword[",i,"][",j,"]: ", crossword[i][j])
-                        #print("slots new:", slots)
-                        slots[count].append([(i-l),crossword[i][j]])
-                        break
-                    count+=1
-            k += 1
-
+        while j <= slot[2]+n:
+            for s in slots:
+                if s[0]=='V' and s[1]<=i and i<=s[1]+s[3] and s[2]==j: # means that both words cross
+                    letter_constraint = crossword[i][j]
+                    position_constraint = i-s[1]
+                    s.append([position_constraint,letter_constraint])
+            j += 1
     return slots
-
 
 # Function: crossword_solution
 # ------------------------------------------------------------------------------
@@ -459,20 +283,24 @@ def crossword_backtracking(slots, m, n, dictionary, crossword):
         for word in dictionary[slot[3]-2]:
             if satisfies_constraint(word, slot[4::]):
                 crossword = write_word(crossword, word, slot)
-                #print("\n5 - slot:",slot, "word:", word, "slots:")
-                #for sloti in slots:
-                #    print(sloti)
+                print("\n5 - slot:",slot, "word:", word, "slots:")
+                for sloti in slots:
+                    print(sloti)
                 slots = calculate_constraints(crossword, word, slots, slot)
-                #print("\n6 - slot:",slot, "word:", word, "slots:")
-                #for sloti in slots:
-                #    print(sloti)
+                print("\n6 - slot:",slot, "word:", word, "slots:")
+                for sloti in slots:
+                    print(sloti)
                 sol = crossword_backtracking(slots[1::], m, n, dictionary, crossword)
                 if sol != []:
                     return sol
     return []
 
-
+# Function: main
+# ------------------------------------------------------------------------------
+#
 def main():
+
+    #while()
     print("Reading crossword...")
     crossword, n, m = readCrossword()
 
