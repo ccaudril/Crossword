@@ -248,7 +248,6 @@ def calculate_constraints(crossword, word, slots, slot):
             j += 1
     return slots
 
-
 # Function: crossing_word
 # ------------------------------------------------------------------------------
 # Giving a slot, finds all other slots that cross it
@@ -258,6 +257,11 @@ def calculate_constraints(crossword, word, slots, slot):
 #   slot: slot for which we want to find crossing words
 #
 #   returns a slot_list with every slot crossing our inital slot
+#   example :
+#       [['V', 0, 0, 4], ['V', 0, 3, 6], ['V', 0, 5, 5]]
+#       [['H', 0, 0, 6], ['H', 2, 2, 4], ['H', 4, 1, 5], ['H', 5, 0, 5]]
+#       [['H', 0, 0, 6], ['H', 2, 2, 4], ['H', 4, 1, 5]]
+#       ...
 #
 def crossing_word(slot, crossword, slots):
     i = slot[1]
@@ -277,7 +281,6 @@ def crossing_word(slot, crossword, slots):
                     slot_list.append(s)
             j += 1
     return slot_list    
-
 
 # Function: crossword_forward_checking
 # ------------------------------------------------------------------------------
@@ -318,25 +321,29 @@ def crossword_forward_checking(slots, m, n, dictionary, crossword):
                 print("\n5 - slot:",slot1, "word:", word1, "slots:")
                 for sloti in slots:
                     print(sloti)
-                slots = calculate_constraints(crossword2, word1, slots, slot1)
+                
+                slots2 = calculate_constraints(crossword2, word1, slots, slot1)
                 print("\n 6 - slot:",slot1, "word:", word1, "slots:")
-                for sloti in slots:
+                for sloti in slots2:
                     print(sloti)
 
+                if slots2 == []:
+                    return crossword
+
                 # taking this couple <slot1,word1>, does it still exist words for the slots that will be constrained ?
-                slot_list = crossing_word(slot1,crossword,slots)
+                slot_list = crossing_word(slot1,crossword2,slots2)
+                print("\n slot_list : ")
+                print(slot_list)
                 for slot2 in slot_list:
                     for word2 in dictionary[slot2[3]-2]:
                         if satisfies_constraint(word2,slot2[4::]):
-                            
+                            slot_list.remove(slot2)
 
-                            sol = crossword_forward_checking(slots[1::],m,n,dictionary,crossword2)
-                            if sol != []:
-                                return sol
+                if slot_list==[]:
+                    sol = crossword_forward_checking(slots2[1::],m,n,dictionary,crossword2)
+                    if sol != []:
+                        return sol
     return []
-
-
-
 
 # Function: main
 # ------------------------------------------------------------------------------
