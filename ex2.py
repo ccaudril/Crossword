@@ -317,30 +317,34 @@ def crossword_forward_checking(slots, m, n, dictionary, crossword):
     for slot1 in slots:
         for word1 in dictionary[slot1[3]-2]:
             if satisfies_constraint(word1, slot1[4::]):
-                crossword2 = write_word(crossword, word1, slot1)
-                print("\n5 - slot:",slot1, "word:", word1, "slots:")
+                temp_crossword = [list(x) for x in crossword]   # we save our current crossword and work on its copy
+                temp_crossword = write_word(temp_crossword, word1, slot1)
+                print("\n slot:",slot1, "word:", word1, "slots:")
                 for sloti in slots:
                     print(sloti)
                 
-                slots2 = calculate_constraints(crossword2, word1, slots, slot1)
-                print("\n 6 - slot:",slot1, "word:", word1, "slots:")
-                for sloti in slots2:
+                temp_slots = [list(x) for x in slots]   # we save our current slot list and work on its copy
+                temp_slots = calculate_constraints(temp_crossword, word1, temp_slots, slot1)
+                print("\n slot:",slot1, "word:", word1, "slots:")
+                for sloti in temp_slots:
                     print(sloti)
 
-                if slots2 == []:
-                    return crossword
 
                 # taking this couple <slot1,word1>, does it still exist words for the slots that will be constrained ?
-                slot_list = crossing_word(slot1,crossword2,slots2)
-                print("\n slot_list : ")
-                print(slot_list)
+                slot_list = crossing_word(slot1,temp_crossword,temp_slots)
+                slot_list_2 = [list(x) for x in slot_list]
                 for slot2 in slot_list:
                     for word2 in dictionary[slot2[3]-2]:
                         if satisfies_constraint(word2,slot2[4::]):
-                            slot_list.remove(slot2)
+                            slot_list_2.remove(slot2)
+                            break
+                        else:
+                            continue
 
-                if slot_list==[]:
-                    sol = crossword_forward_checking(slots2[1::],m,n,dictionary,crossword2)
+                if slot_list_2==[]:   # it means that all crossing words have solutions that satisfy constraints
+                    crossword = [list(x) for x in temp_crossword]
+                    slots = [list(x) for x in temp_slots]
+                    sol = crossword_forward_checking(slots[1::],m,n,dictionary,crossword)
                     if sol != []:
                         return sol
     return []
@@ -365,6 +369,7 @@ def main():
 
     print("Solution:")
     print(solution)
+    
 
 if __name__ == "__main__":
     main()    
