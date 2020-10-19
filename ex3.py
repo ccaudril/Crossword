@@ -175,43 +175,6 @@ def calculateSlots(crossword, n, m):
 
     return slots, lenghts
 
-# Function: satisfies_constraint
-# ------------------------------------------------------------------------------
-# Calculates if a given word satisfies a list of constraints
-#
-#   word: word that must satisfie the constraints
-#   constraints: list of constraint tuples
-#
-#   returns True if th word satisfies the constraints, False icc.
-#
-def satisfies_constraint(word, constraints):
-    for tuple in constraints:
-        if word[tuple[0]] != tuple[1]:
-            return False
-    return True
-
-# Function: search_word
-# ------------------------------------------------------------------------------
-#   Giving a slot, that function searches corresponding words
-#   
-#   slot : filled blank for which we search a word
-#   dictionary : dictionary where the word has to be found
-#
-#   returns a list of words that correspond to every slot constraint
-#
-def search_word(slot,dictionary):
-    constraints = slot[5::]
-    sorted(constraints, key=lambda x: x[0])    # we sort the constraint list according to the position of each constraint
-    solution_word_list = []
-    for word in dictionary[slot[3]-2]:
-        for tuple in constraints:
-            if word[tuple[0]] != tuple[1]:
-                break
-            else:
-                continue
-        solution_word_list.append(word)
-    return solution_word_list
-
 # Function: sort_by_number_of_intersection
 # ------------------------------------------------------------------------------
 #   Giving a slot, that function calculates how many intersection it has
@@ -241,8 +204,24 @@ def sort_by_number_of_intersection(crossword, slots):
                 j += 1
         slot.append(nb_inter)
     slots.sort(key = lambda x: x[4], reverse=True)
+    for slot in slots :
+        slot.pop()
     return slots
 
+# Function: satisfies_constraint
+# ------------------------------------------------------------------------------
+# Calculates if a given word satisfies a list of constraints
+#
+#   word: word that must satisfie the constraints
+#   constraints: list of constraint tuples
+#
+#   returns True if th word satisfies the constraints, False icc.
+#
+def satisfies_constraint(word, constraints):
+    for tuple in constraints:
+        if word[tuple[0]] != tuple[1]:
+            return False
+    return True
 
 # Function: write_word
 # ------------------------------------------------------------------------------
@@ -300,47 +279,9 @@ def calculate_constraints(crossword, word, slots, slot):
                     position_constraint = i-s[1]
                     s.append([position_constraint,letter_constraint])
             j += 1
-
-     # Order the slots list
-    slots.sort(key = len, reverse=True)
-
     return slots
 
-# Function: crossing_word
-# ------------------------------------------------------------------------------
-# Giving a slot, finds all other slots that cross it
-#
-#   crossword: matrix representation of the crossword
-#   slots : slot list for the entire crossword
-#   slot: slot for which we want to find crossing words
-#
-#   returns a slot_list with every slot crossing our inital slot
-#   example :
-#       [['V', 0, 0, 4], ['V', 0, 3, 6], ['V', 0, 5, 5]]
-#       [['H', 0, 0, 6], ['H', 2, 2, 4], ['H', 4, 1, 5], ['H', 5, 0, 5]]
-#       [['H', 0, 0, 6], ['H', 2, 2, 4], ['H', 4, 1, 5]]
-#       ...
-#
-def crossing_word(slot, crossword, slots):
-    i = slot[1]
-    j = slot[2]
-    n = slot[3]
-    slot_list = []
-    if slot[0] == "V":
-        while i < slot[1]+n:
-            for s in slots:
-                if s[0]=='H' and s[1]==i and s[2]<=j and j<=s[2]+s[3]:  # means that both words cross
-                    slot_list.append(s)
-            i += 1
-    else:
-        while j < slot[2]+n:
-            for s in slots:
-                if s[0]=='V' and s[1]<=i and i<=s[1]+s[3] and s[2]==j: # means that both words cross
-                    slot_list.append(s)
-            j += 1
-    return slot_list    
-
-# Function: crossword_forward_checking
+# Function: long_crossword_solution
 # ------------------------------------------------------------------------------
 # Gives a final solution for the given crossword
 #
@@ -352,7 +293,7 @@ def crossing_word(slot, crossword, slots):
 #
 #   returns a crossword as final solution
 #
-def crossword_forward_checking(slots, m, n, dictionary, crossword):
+def long_crossword_solution(slots, m, n, dictionary, crossword):
 
     print("\n----------------------------------------------------------\ncrossword:")
     for line in crossword:
@@ -371,35 +312,18 @@ def crossword_forward_checking(slots, m, n, dictionary, crossword):
 
     if slots == []:
         return crossword
-
-    for slot1 in slots:
-        crossing_list = crossing_word(slot1,crossword,slots)
-        for word1 in search_word(slot1, dictionary):
-            temp_crossword = [list(x) for x in crossword]   # we save our current crossword and work on its copy
-            temp_crossword = write_word(temp_crossword, word1, slot1)
-            print("\n slot:",slot1, "word:", word1, "slots:")
-            for sloti in crossing_list:
-                print(sloti)
-            
-            temp_slots = [list(x) for x in slots]   # we save our current slot list and work on its copy
-            temp_slots = calculate_constraints(temp_crossword, word1, crossing_list, slot1)
-            print("\n slot:",slot1, "word:", word1, "slots:")
-            for sloti in crossing_list:
-                print(sloti)
-
-
-            # taking this couple <slot1,word1>, does it still exist words for the slots that will be constrained ?
-            crossing_list_2 = [list(x) for x in crossing_list]
-            print("\n crossing_list",crossing_list_2)
-            for slot2 in crossing_list_2:
-                if search_word(slot2, dictionary)==[]:
-                    break
-
-            if crossing_list_2==[]:   # it means that all crossing words have solutions that satisfy constraints
-                #print("\n word :", word1)
-                crossword = [list(x) for x in temp_crossword]
-                slots = [list(x) for x in temp_slots]
-                sol = crossword_forward_checking(slots[1::],m,n,dictionary,crossword)
+    for slot in slots:
+        for word in dictionary[slot[3]-2]:
+            if satisfies_constraint(word, slot[4::]):
+                crossword = write_word(crossword, word, slot)
+                print("\n5 - slot:",slot, "word:", word, "slots:")
+                for sloti in slots:
+                    print(sloti)
+                slots = calculate_constraints(crossword, word, slots, slot)
+                print("\n6 - slot:",slot, "word:", word, "slots:")
+                for sloti in slots:
+                    print(sloti)
+                sol = long_crossword_solution(slots[1::], m, n, dictionary, crossword)
                 if sol != []:
                     return sol
     return []
@@ -421,11 +345,10 @@ def main():
     dictionary = readDictionary(lenghts)
 
     print("Calculating solution...")
-    solution = crossword_forward_checking(slots, m, n, dictionary, crossword)
+    solution = long_crossword_solution(slots, m, n, dictionary, crossword)
 
     print("Solution:")
     print(solution)
-    
 
 if __name__ == "__main__":
-    main()    
+    main()
